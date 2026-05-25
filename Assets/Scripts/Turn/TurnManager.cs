@@ -2,137 +2,92 @@ using System;
 
 namespace PlanetCore
 {
-    public class TurnManager
+    public sealed class TurnManager
     {
-        public SessionState CurrentState      { get; private set; } = SessionState.RealTimePhase;
-        public int          TurnNumber        { get; private set; } = 1;
-        public bool         IsReprieve        { get; private set; } = false;
-        public float        ElapsedDayTime    { get; private set; } = 0f;
-        public float        SpeedMultiplier   { get; private set; } = 1f;
-        public bool         TimeAccelUnlocked { get; private set; } = false;
+        private readonly IGameConfig     _config;
+        private readonly QuotaCalculator _quota;
+        private readonly EnergyPool      _energyPool;
+        private readonly EconomyState    _economy;
 
-        public float CurrentQuota => QuotaCalculator.Compute(_baseQuota, TurnNumber);
+        public IGameConfig Config      => _config;
+        public int         DayNumber   { get; private set; } = 1;
+        public float       ElapsedDayTime { get; private set; } = 0f;
+        public float       SpeedMultiplier { get; set; } = 1f;
+        public bool        IsGameOver  { get; private set; } = false;
 
-        private readonly EconomyState _economy;
-        private readonly BatteryState _battery;
-        private readonly float        _baseQuota;
+        public float CurrentQuota => _quota.CalculateQuota(DayNumber);
+        public float DayProgress  => _config.DayLengthSeconds <= 0f
+            ? 0f : Math.Min(1f, ElapsedDayTime / _config.DayLengthSeconds);
 
-        public event Action<SessionState>     OnStateChanged;
-        public event Action                   OnRewardPhaseStarted;
+        public event Action<int>              OnDayStarted;
         public event Action<SettlementResult> OnSettlementCompleted;
         public event Action                   OnGameOver;
 
-        public TurnManager(EconomyState economy, BatteryState battery, float baseQuota = 100f)
+        public TurnManager(
+            IGameConfig config,
+            QuotaCalculator quota,
+            EnergyPool energyPool,
+            EconomyState economy)
         {
-            _economy   = economy;
-            _battery   = battery;
-            _baseQuota = baseQuota;
+            _config     = config;
+            _quota      = quota;
+            _energyPool = energyPool;
+            _economy    = economy;
         }
 
-        public void Tick(float realDeltaTime)
+        public bool Tick(float realDeltaTime)
         {
-            if (CurrentState != SessionState.RealTimePhase) return;
+            if (IsGameOver) return false;
 
             ElapsedDayTime += realDeltaTime * SpeedMultiplier;
 
-            if (ElapsedDayTime >= GameConstants.DayLengthSeconds)
-            {
-                ElapsedDayTime = GameConstants.DayLengthSeconds;
-                Transition(SessionState.SettlementPhase);
-            }
-        }
+            if (ElapsedDayTime < _config.DayLengthSeconds) return false;
 
-        public bool TrySetSpeed(float multiplier)
-        {
-            if (!TimeAccelUnlocked || multiplier <= 0f) return false;
-            SpeedMultiplier = multiplier;
+            ElapsedDayTime = _config.DayLengthSeconds;
             return true;
         }
 
-        public void UnlockTimeAccelerator() => TimeAccelUnlocked = true;
-
         public SettlementResult ExecuteSettlement()
         {
-            if (CurrentState != SessionState.SettlementPhase)
-                throw new InvalidOperationException("Settlement called outside SettlementPhase.");
-
             float quota     = CurrentQuota;
-            float delivered = _battery.TotalDeliverable;
+            float available = _energyPool.StoredEnergy;
+            float delivered = Math.Min(quota, available);
+            float drained   = _energyPool.Drain(delivered);
+            float shortfall = Math.Max(0f, quota - drained);
+            bool  met       = shortfall <= 0f;
+            float credits   = met ? _quota.CalculateCredits(drained, quota) : 0f;
 
-            SettlementResult result = delivered >= quota
-                ? ProcessSuccess(quota, delivered)
-                : ProcessFailure(quota, delivered);
+            if (met) _economy.AddCredits(credits);
+
+            var result = new SettlementResult(
+                DayNumber, quota, drained, shortfall, met, credits, 0f);
 
             OnSettlementCompleted?.Invoke(result);
+
+            if (!met)
+            {
+                IsGameOver = true;
+                OnGameOver?.Invoke();
+            }
+
             return result;
         }
 
-        private SettlementResult ProcessSuccess(float quota, float delivered)
+        public void AdvanceToNextDay()
         {
-            float surplus = delivered - quota;
-            float earned  = quota * GameConstants.BaseRate + surplus * GameConstants.BonusRate;
-
-            _economy.AddCredits(earned);
-            _battery.DrainAll();
-
-            TurnNumber++;
-            IsReprieve     = false;
+            if (IsGameOver) return;
+            DayNumber++;
             ElapsedDayTime = 0f;
-
-            Transition(SessionState.RewardPhase);
-            OnRewardPhaseStarted?.Invoke();
-
-            return new SettlementResult(true, quota, delivered, earned, 0f, TurnNumber, false);
+            OnDayStarted?.Invoke(DayNumber);
         }
 
-        private SettlementResult ProcessFailure(float quota, float delivered)
+        public void HardReset()
         {
-            float earned  = delivered * GameConstants.BaseRate;
-            float penalty = quota - delivered;
-
-            _economy.AddCredits(earned);
-            _economy.SpendCredits(penalty);
-            _battery.DrainAll();
-            ElapsedDayTime = 0f;
-
-            if (IsReprieve)
-            {
-                var goResult = new SettlementResult(false, quota, delivered, earned, penalty, TurnNumber, true);
-                Transition(SessionState.GameOver);
-                OnGameOver?.Invoke();
-                return goResult;
-            }
-
-            IsReprieve = true;
-            Transition(SessionState.ReprievePhase);
-            return new SettlementResult(false, quota, delivered, earned, penalty, TurnNumber, false);
-        }
-
-        public void ResumeFromReward()
-        {
-            if (CurrentState != SessionState.RewardPhase) return;
-            Transition(SessionState.RealTimePhase);
-        }
-
-        public void ResumeFromReprieve()
-        {
-            if (CurrentState != SessionState.ReprievePhase) return;
-            Transition(SessionState.RealTimePhase);
-        }
-
-        public void SessionReset()
-        {
-            TurnNumber      = 1;
-            IsReprieve      = false;
+            DayNumber       = 1;
             ElapsedDayTime  = 0f;
             SpeedMultiplier = 1f;
-            CurrentState    = SessionState.RealTimePhase;
-        }
-
-        private void Transition(SessionState next)
-        {
-            CurrentState = next;
-            OnStateChanged?.Invoke(next);
+            IsGameOver      = false;
+            OnDayStarted?.Invoke(DayNumber);
         }
     }
 }

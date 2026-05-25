@@ -1,0 +1,17 @@
+key,value
+ChunkSize,5
+StartingCredits,300
+DepositChance,0.1
+ManualBurstDuration,3
+ManualBurstEnergyPerSec,20
+BaseQuota,500
+QuotaGrowthRate,0.2
+BaseRate,1
+BonusRate,1.5
+DemolishRefundRatio,0.6
+BuildingCostBase,30
+BuildingCostExponent,1.2
+RerollBaseCost,10
+RerollCostMultiplier,1.5
+DayLengthSeconds,100
+TileSize,1

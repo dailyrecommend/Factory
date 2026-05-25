@@ -2,11 +2,16 @@ using System;
 
 namespace PlanetCore
 {
-    public class EconomyState
+    // Tracks player credits.
+    // Pure C# domain class — no MonoBehaviour, no static singletons.
+    public sealed class EconomyState
     {
-        public float Credits { get; private set; } = 0f;
+        public float Credits { get; private set; }
 
         public event Action<float> OnCreditsChanged;
+
+        public EconomyState(float startingCredits = 0f)
+            => Credits = startingCredits;
 
         public void AddCredits(float amount)
         {
@@ -15,15 +20,21 @@ namespace PlanetCore
             OnCreditsChanged?.Invoke(Credits);
         }
 
-        public void SpendCredits(float amount)
+        public bool SpendCredits(float amount)
         {
-            Credits = Math.Max(0f, Credits - amount);
+            if (amount <= 0f)        return true;
+            if (amount > Credits)    return false;
+
+            Credits -= amount;
             OnCreditsChanged?.Invoke(Credits);
+            return true;
         }
 
-        public void Reset()
+        public bool CanAfford(float amount) => Credits >= amount;
+
+        public void HardReset(float startingCredits = 0f)
         {
-            Credits = 0f;
+            Credits = startingCredits;
             OnCreditsChanged?.Invoke(Credits);
         }
     }

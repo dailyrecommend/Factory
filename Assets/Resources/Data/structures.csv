@@ -1,0 +1,6 @@
+structureId,displayName,cost,requiredTileTag,prefabPath
+basecamp,Basecamp,0,,Structures/Basecamp
+generator,Generator,50,,Structures/Generator
+extractor,Extractor,50,mineable,Structures/Extractor
+energy_storage,Energy Storage,80,,Structures/EnergyStorage
+broker,Broker,300,,Structures/Broker

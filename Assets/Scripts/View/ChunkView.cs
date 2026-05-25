@@ -2,38 +2,69 @@ using UnityEngine;
 
 namespace PlanetCore
 {
-    /// <summary>
-    /// Spawns and manages the visual tile GameObjects for one chunk.
-    /// Attach this to a ChunkView prefab or empty GameObject.
-    /// </summary>
-    public class ChunkView : MonoBehaviour
+    public sealed class ChunkView : MonoBehaviour
     {
-        private GameObject[,] _tileObjects = new GameObject[GameConstants.ChunkSize, GameConstants.ChunkSize];
-        private Chunk _chunk;
+        private IGameConfig _config;
+        private Chunk       _chunk;
 
-        /// <summary>
-        /// Spawns all 5x5 tiles for the given chunk.
-        /// Called once by WorldRenderer when a chunk is unlocked.
-        /// </summary>
-        public void Initialise(Chunk chunk, GameObject tilePrefab, float tileSize)
+        private static readonly Color ColorPlain    = new Color(0.55f, 0.76f, 0.45f);
+        private static readonly Color ColorDeposit  = new Color(0.40f, 0.28f, 0.18f);
+        private static readonly Color ColorInactive = new Color(0.4f,  0.4f,  0.4f);
+
+        public void Init(Chunk chunk, IGameConfig config)
         {
-            _chunk = chunk;
+            _chunk  = chunk;
+            _config = config;
+            Render();
+        }
 
-            for (int lx = 0; lx < GameConstants.ChunkSize; lx++)
-            for (int ly = 0; ly < GameConstants.ChunkSize; ly++)
+        // Called when chunk state changes (active ↔ inactive)
+        public void Refresh()
+        {
+            foreach (Transform child in transform)
             {
-                var tile = chunk.GetTile(lx, ly);
+                var tileRef = child.GetComponent<TileRef>();
+                if (tileRef == null) continue;
 
-                Vector3 worldPos = new Vector3(
-                    tile.WorldX * tileSize,
-                    0f,
-                    tile.WorldY * tileSize);
+                var renderer = child.GetComponentInChildren<Renderer>();
+                if (renderer == null) continue;
 
-                var obj = Instantiate(tilePrefab, worldPos, Quaternion.identity, transform);
-                obj.name = $"Tile_{tile.WorldX}_{tile.WorldY}";
-
-                _tileObjects[lx, ly] = obj;
+                renderer.material.color = _chunk.IsActive
+                    ? TileColor(tileRef.Tile)
+                    : ColorInactive;
             }
+        }
+
+        private void Render()
+        {
+            foreach (var tile in _chunk.AllTiles())
+            {
+                var prefab = Resources.Load<GameObject>(tile.Definition.PrefabPath);
+
+                if (prefab == null)
+                {
+                    Debug.LogError($"[ChunkView] Prefab not found: {tile.Definition.PrefabPath}");
+                    continue;
+                }
+
+                var go = Instantiate(prefab, transform);
+                go.transform.localPosition = TileToWorld(tile.WorldX, tile.WorldY);
+                go.name  = $"Tile_{tile.WorldX}_{tile.WorldY}";
+                go.layer = LayerMask.NameToLayer("Tile");
+
+                var tileRef = go.AddComponent<TileRef>();
+                tileRef.Tile  = tile;
+                tileRef.Chunk = _chunk;
+            }
+        }
+
+        private Vector3 TileToWorld(int worldX, int worldY)
+            => new Vector3(worldX * _config.TileSize, 0f, worldY * _config.TileSize);
+
+        private static Color TileColor(TileData tile)
+        {
+            if (tile.HasTag("mineable")) return ColorDeposit;
+            return ColorPlain;
         }
     }
 }

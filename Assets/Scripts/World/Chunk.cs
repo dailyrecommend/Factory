@@ -2,29 +2,34 @@ using System.Collections.Generic;
 
 namespace PlanetCore
 {
-    public class Chunk
+    public sealed class Chunk
     {
-        public int ChunkX { get; }
-        public int ChunkY { get; }
+        public int        ChunkX { get; }
+        public int        ChunkY { get; }
+        public ChunkState State  { get; set; } = ChunkState.Active;
 
-        private readonly Tile[,] _tiles =
-            new Tile[GameConstants.ChunkSize, GameConstants.ChunkSize];
+        private readonly TileData[,] _tiles;
+        private readonly int         _size;
 
-        public Chunk(int chunkX, int chunkY)
+        public Chunk(int chunkX, int chunkY, int size)
         {
             ChunkX = chunkX;
             ChunkY = chunkY;
+            _size  = size;
+            _tiles = new TileData[size, size];
         }
 
-        public Tile GetTile(int localX, int localY) => _tiles[localX, localY];
+        public bool IsActive => State == ChunkState.Active;
 
-        public void SetTile(int localX, int localY, Tile tile)
+        public TileData GetTile(int localX, int localY) => _tiles[localX, localY];
+
+        public void SetTile(int localX, int localY, TileData tile)
             => _tiles[localX, localY] = tile;
 
-        public IEnumerable<Tile> AllTiles()
+        public IEnumerable<TileData> AllTiles()
         {
-            for (int x = 0; x < GameConstants.ChunkSize; x++)
-            for (int y = 0; y < GameConstants.ChunkSize; y++)
+            for (int x = 0; x < _size; x++)
+            for (int y = 0; y < _size; y++)
                 yield return _tiles[x, y];
         }
     }

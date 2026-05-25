@@ -2,15 +2,22 @@ using System;
 
 namespace PlanetCore
 {
-    public class ChunkGenerator
+    // Generates Chunk instances with procedurally placed tile types.
+    // Tile type IDs are resolved via DataRegistry.
+    public sealed class ChunkGenerator
     {
-        private readonly int _worldSeed;
-        private int _minDepositCount;
+        private readonly int          _worldSeed;
+        private readonly DataRegistry _registry;
+        private int                   _minDepositCount;
 
-        public ChunkGenerator(int worldSeed, int minDepositCount = 0)
+        private const string PlainId   = "plain";
+        private const string DepositId = "resource_deposit";
+
+        public ChunkGenerator(int worldSeed, DataRegistry registry, int minDepositCount = 0)
         {
-            _worldSeed        = worldSeed;
-            _minDepositCount  = minDepositCount;
+            _worldSeed       = worldSeed;
+            _registry        = registry;
+            _minDepositCount = minDepositCount;
         }
 
         public void IncreaseMinDeposits(int delta)
@@ -18,33 +25,34 @@ namespace PlanetCore
 
         public Chunk Generate(int chunkX, int chunkY)
         {
-            var chunk = new Chunk(chunkX, chunkY);
-            var rng   = MakeRng(chunkX, chunkY);
-            int size  = GameConstants.ChunkSize;
+            var cfg          = _registry.Config;
+            int size         = cfg.ChunkSize;
+            var chunk        = new Chunk(chunkX, chunkY, size);
+            var rng          = MakeRng(chunkX, chunkY);
+            var plainDef     = _registry.GetTile(PlainId);
+            var depositDef   = _registry.GetTile(DepositId);
             int depositCount = 0;
 
             for (int lx = 0; lx < size; lx++)
             for (int ly = 0; ly < size; ly++)
             {
-                int  worldX    = chunkX * size + lx;
-                int  worldY    = chunkY * size + ly;
-                bool isDeposit = rng.NextDouble() < 0.25;
+                int  wx        = chunkX * size + lx;
+                int  wy        = chunkY * size + ly;
+                bool isDeposit = rng.NextDouble() < cfg.DepositChance;
                 if (isDeposit) depositCount++;
 
-                chunk.SetTile(lx, ly, new Tile(
-                    worldX, worldY,
-                    isDeposit ? TerrainType.ResourceDeposit : TerrainType.Plain,
-                    isDeposit ? ResourceType.Coal            : ResourceType.None));
+                chunk.SetTile(lx, ly, new TileData(wx, wy,
+                    isDeposit ? depositDef : plainDef));
             }
 
+            // Guarantee minimum deposit count if required (e.g. PioneeringLuck card)
             for (int lx = 0; lx < size && depositCount < _minDepositCount; lx++)
             for (int ly = 0; ly < size && depositCount < _minDepositCount; ly++)
             {
                 var tile = chunk.GetTile(lx, ly);
-                if (tile.TerrainType == TerrainType.Plain)
+                if (!tile.HasTag("mineable"))
                 {
-                    tile.TerrainType  = TerrainType.ResourceDeposit;
-                    tile.ResourceType = ResourceType.Coal;
+                    chunk.SetTile(lx, ly, new TileData(tile.WorldX, tile.WorldY, depositDef));
                     depositCount++;
                 }
             }

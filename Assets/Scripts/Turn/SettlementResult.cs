@@ -1,27 +1,33 @@
 namespace PlanetCore
 {
-    public class SettlementResult
+    // Immutable value object describing the outcome of a daily settlement.
+    // Produced by TurnManager.ExecuteSettlement and consumed by UI/RewardSystem.
+    public sealed class SettlementResult
     {
-        public bool  WasSuccess      { get; }
+        public int   DayNumber       { get; }
         public float Quota           { get; }
-        public float TotalDelivered  { get; }
-        public float Surplus         { get; }
+        public float EnergyDelivered { get; }
+        public float EnergyShortfall { get; }
+        public bool  QuotaMet        { get; }
         public float CreditsEarned   { get; }
-        public float CreditsDeducted { get; }
-        public int   TurnNumber      { get; }
-        public bool  IsGameOver      { get; }
+        public float OverproductionUsed { get; }
 
-        public SettlementResult(bool success, float quota, float delivered,
-            float earned, float deducted, int turn, bool gameOver)
+        public SettlementResult(
+            int   dayNumber,
+            float quota,
+            float energyDelivered,
+            float energyShortfall,
+            bool  quotaMet,
+            float creditsEarned,
+            float overproductionUsed)
         {
-            WasSuccess      = success;
-            Quota           = quota;
-            TotalDelivered  = delivered;
-            Surplus         = delivered - quota;
-            CreditsEarned   = earned;
-            CreditsDeducted = deducted;
-            TurnNumber      = turn;
-            IsGameOver      = gameOver;
+            DayNumber          = dayNumber;
+            Quota              = quota;
+            EnergyDelivered    = energyDelivered;
+            EnergyShortfall    = energyShortfall;
+            QuotaMet           = quotaMet;
+            CreditsEarned      = creditsEarned;
+            OverproductionUsed = overproductionUsed;
         }
     }
 }

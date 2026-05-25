@@ -1,0 +1,3 @@
+tileTypeId,displayName,tags,prefabPath
+plain,Plain,,Tiles/PlainTile
+resource_deposit,Coal Deposit,mineable|has_resource,Tiles/DepositTile

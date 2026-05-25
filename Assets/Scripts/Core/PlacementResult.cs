@@ -4,7 +4,7 @@ namespace PlanetCore
     {
         Success,
         TileOccupied,
-        InvalidTerrain,
+        TagRequirementNotMet,
         ChunkNotUnlocked,
         InsufficientCredits
     }
