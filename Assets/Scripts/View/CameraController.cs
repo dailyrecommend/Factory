@@ -63,7 +63,7 @@ namespace PlanetCore
             _lastMousePos       = currentMousePos;
 
             // Scale drag speed with zoom so panning feels consistent
-            float speed = _dragSpeed * Mathf.Lerp(1f, 3f, ZoomRatio);
+            float speed = _dragSpeed * Mathf.Lerp(1f, 5f, ZoomRatio);
             var   forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
             var   right   = Vector3.ProjectOnPlane(transform.right,   Vector3.up).normalized;
             var move = (-right * delta.x + -forward * delta.y) * speed * Time.unscaledDeltaTime;

@@ -409,10 +409,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlanetCore.CameraController
   _camera: {fileID: 330585545}
-  _dragSpeed: 1.3
+  _dragSpeed: 1
   _zoomSpeed: 40
-  _minOrthoSize: 3
-  _maxOrthoSize: 9
+  _minOrthoSize: 2
+  _maxOrthoSize: 10
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
