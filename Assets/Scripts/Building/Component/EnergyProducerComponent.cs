@@ -21,6 +21,9 @@ namespace PlanetCore
         public void OnPlaced (TileData tile, ComponentContext ctx) { }
         public void OnRemoved(TileData tile, ComponentContext ctx) { }
 
+        public void OnChunkActivated()   => IsOperational = true;
+        public void OnChunkDeactivated() => IsOperational = false;
+
         public float Tick(float deltaTime, ComponentContext ctx)
         {
             if (!IsOperational) return 0f;

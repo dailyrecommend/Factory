@@ -36,5 +36,11 @@ namespace PlanetCore
             if (_chunkViews.TryGetValue((chunk.ChunkX, chunk.ChunkY), out var view))
                 view.Refresh();
         }
+        
+        public bool HasChunkView(Chunk chunk)
+            => _chunkViews.ContainsKey((chunk.ChunkX, chunk.ChunkY));
+        
+        public ChunkView GetChunkView(int cx, int cy)
+            => _chunkViews.TryGetValue((cx, cy), out var view) ? view : null;
     }
 }

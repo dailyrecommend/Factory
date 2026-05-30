@@ -7,32 +7,40 @@ namespace PlanetCore
         private IGameConfig _config;
         private Chunk       _chunk;
 
-        private static readonly Color ColorPlain    = new Color(0.55f, 0.76f, 0.45f);
-        private static readonly Color ColorDeposit  = new Color(0.40f, 0.28f, 0.18f);
-        private static readonly Color ColorInactive = new Color(0.4f,  0.4f,  0.4f);
-
         public void Init(Chunk chunk, IGameConfig config)
         {
             _chunk  = chunk;
             _config = config;
+
+            _chunk.OnActiveChanged += OnActiveChanged;
             Render();
         }
 
-        // Called when chunk state changes (active ↔ inactive)
+        private void OnDestroy()
+        {
+            if (_chunk != null)
+                _chunk.OnActiveChanged -= OnActiveChanged;
+        }
+
+        private void OnActiveChanged(bool isActive)
+        {
+            gameObject.SetActive(isActive);
+
+            if (isActive)
+                RestoreStructureAnimators();
+        }
+
         public void Refresh()
         {
-            foreach (Transform child in transform)
-            {
-                var tileRef = child.GetComponent<TileRef>();
-                if (tileRef == null) continue;
+            gameObject.SetActive(_chunk.IsActive);
+            if (_chunk.IsActive)
+                RestoreStructureAnimators();
+        }
 
-                var renderer = child.GetComponentInChildren<Renderer>();
-                if (renderer == null) continue;
-
-                renderer.material.color = _chunk.IsActive
-                    ? TileColor(tileRef.Tile)
-                    : ColorInactive;
-            }
+        private void RestoreStructureAnimators()
+        {
+            foreach (var animator in GetComponentsInChildren<StructureAnimator>())
+                animator.RestoreState();
         }
 
         private void Render()
@@ -60,11 +68,5 @@ namespace PlanetCore
 
         private Vector3 TileToWorld(int worldX, int worldY)
             => new Vector3(worldX * _config.TileSize, 0f, worldY * _config.TileSize);
-
-        private static Color TileColor(TileData tile)
-        {
-            if (tile.HasTag("mineable")) return ColorDeposit;
-            return ColorPlain;
-        }
     }
 }

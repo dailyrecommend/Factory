@@ -1,31 +1,40 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace PlanetCore
 {
     public sealed class HUDView : MonoBehaviour
     {
-        [SerializeField] private Text _creditsText;
-        [SerializeField] private Text _energyText;
-        [SerializeField] private Text _quotaText;
-        [SerializeField] private Text _dayText;
+        [Header("Battery")]
+        [SerializeField] private Image            _batteryFill;
+        [SerializeField] private TextMeshProUGUI  _batteryText;
 
-        private EconomyState _economy;
-        private EnergyPool   _energyPool;
-        private TurnManager  _turnManager;
+        [Header("Sell Timer")]
+        [SerializeField] private Image            _sellTimerFill;
 
-        public void Init(EconomyState economy, EnergyPool energyPool, TurnManager turnManager)
+        [Header("Credits")]
+        [SerializeField] private TextMeshProUGUI  _creditsText;
+
+        [Header("EPS")]
+        [SerializeField] private TextMeshProUGUI  _epsText;
+
+        private EconomyState     _economy;
+        private EnergyPool       _energyPool;
+        private SimulationEngine _simulationEngine;
+
+        public void Init(
+            EconomyState economy,
+            EnergyPool energyPool,
+            SimulationEngine simulationEngine)
         {
-            _economy     = economy;
-            _energyPool  = energyPool;
-            _turnManager = turnManager;
+            _economy          = economy;
+            _energyPool       = energyPool;
+            _simulationEngine = simulationEngine;
 
             _economy.OnCreditsChanged     += OnCreditsChanged;
             _energyPool.OnStoredChanged   += OnEnergyChanged;
             _energyPool.OnCapacityChanged += OnEnergyChanged;
-
-            _turnManager.OnDayStarted         += OnDayStarted;
-            _turnManager.OnSettlementCompleted += OnSettlementCompleted;
 
             RefreshAll();
         }
@@ -40,58 +49,49 @@ namespace PlanetCore
                 _energyPool.OnStoredChanged   -= OnEnergyChanged;
                 _energyPool.OnCapacityChanged -= OnEnergyChanged;
             }
-
-            if (_turnManager != null)
-            {
-                _turnManager.OnDayStarted          -= OnDayStarted;
-                _turnManager.OnSettlementCompleted -= OnSettlementCompleted;
-            }
         }
 
-        // Time-based update only for day progress
         private void Update()
         {
-            if (_turnManager == null) return;
-            RefreshDay();
+            RefreshSellTimer();
+            RefreshEPS();
         }
 
-        private void OnCreditsChanged(float _)    => RefreshCredits();
-        private void OnEnergyChanged(float _)      => RefreshEnergy();
-        private void OnDayStarted(int _)           => RefreshDay();
-        private void OnSettlementCompleted(SettlementResult _) => RefreshAll();
+        private void OnCreditsChanged(float _) => RefreshCredits();
+        private void OnEnergyChanged(float _)  => RefreshBattery();
 
         private void RefreshAll()
         {
+            RefreshBattery();
             RefreshCredits();
-            RefreshEnergy();
-            RefreshQuota();
-            RefreshDay();
+            RefreshEPS();
+        }
+
+        private void RefreshBattery()
+        {
+            if (_batteryFill != null)
+                _batteryFill.fillAmount = _energyPool.FillRatio;
+
+            if (_batteryText != null)
+                _batteryText.text = $"{_energyPool.StoredEnergy:F0} / {_energyPool.TotalCapacity:F0}";
+        }
+
+        private void RefreshSellTimer()
+        {
+            if (_sellTimerFill != null)
+                _sellTimerFill.fillAmount = _energyPool.SellTimerRatio;
         }
 
         private void RefreshCredits()
         {
             if (_creditsText != null)
-                _creditsText.text = $"Credits: {_economy.Credits:F0}";
+                _creditsText.text = $"{_economy.Credits:N0}";
         }
 
-        private void RefreshEnergy()
+        private void RefreshEPS()
         {
-            if (_energyText != null)
-                _energyText.text = $"Energy: {_energyPool.StoredEnergy:F0} / {_energyPool.TotalCapacity:F0}";
-        }
-
-        private void RefreshQuota()
-        {
-            if (_quotaText != null)
-                _quotaText.text = $"Quota: {_turnManager.CurrentQuota:F0}";
-        }
-
-        private void RefreshDay()
-        {
-            if (_dayText == null) return;
-            float remaining = _turnManager.Config.DayLengthSeconds
-                            * (1f - _turnManager.DayProgress);
-            _dayText.text = $"Day {_turnManager.DayNumber} — {remaining:F0}s";
+            if (_epsText != null)
+                _epsText.text = $"{_simulationEngine.CurrentEPS:F1}";
         }
     }
 }

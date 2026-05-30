@@ -1,0 +1,10 @@
+upgradeId,displayName,cost,unlockType,unlockValue,effectType,effectTarget,effectValue,spriteName,description
+eps_boost_1,Generator Efficiency I,500,eps,5,eps_multiplier,,0.02,icon_eps,Increases all generator output by +2%
+eps_boost_2,Generator Efficiency II,2000,eps,20,eps_multiplier,,0.02,icon_eps,Increases all generator output by +2%
+eps_boost_3,Generator Efficiency III,8000,eps,50,eps_multiplier,,0.05,icon_eps,Increases all generator output by +5%
+epc_boost_1,Conversion Efficiency I,800,capacity,100,epc_multiplier,,0.02,icon_epc,Increases energy to credits conversion rate by +2%
+epc_boost_2,Conversion Efficiency II,3000,capacity,300,epc_multiplier,,0.03,icon_epc,Increases energy to credits conversion rate by +3%
+epc_boost_3,Conversion Efficiency III,10000,capacity,600,epc_multiplier,,0.05,icon_epc,Increases energy to credits conversion rate by +5%
+storage_boost_1,Storage Upgrade I,1000,structure_count,3,structure_stat,energy_storage,50,icon_storage,Increases all energy storage capacity by +50
+storage_boost_2,Storage Upgrade II,4000,structure_count,6,structure_stat,energy_storage,100,icon_storage,Increases all energy storage capacity by +100
+storage_boost_3,Storage Upgrade III,12000,structure_count,10,structure_stat,energy_storage,200,icon_storage,Increases all energy storage capacity by +200

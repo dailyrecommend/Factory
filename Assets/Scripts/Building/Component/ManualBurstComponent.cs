@@ -10,7 +10,7 @@ namespace PlanetCore
 
         public string StructureId   => _structureId;
         public string DisplayName   => _displayName;
-        public bool   IsOperational => true;
+        public bool   IsOperational { get; private set; } = true;
         public bool   EmitsSynergy  => false;
         public float  SynergyBonusRatio => 0f;
 
@@ -23,9 +23,16 @@ namespace PlanetCore
         public void OnRemoved(TileData tile, ComponentContext ctx)
             => BurstTimeRemaining = 0f;
 
+        public void OnChunkActivated()   => IsOperational = true;
+        public void OnChunkDeactivated()
+        {
+            BurstTimeRemaining = 0f;
+            IsOperational      = false;
+        }
+
         public float Tick(float deltaTime, ComponentContext ctx)
         {
-            if (BurstTimeRemaining <= 0f) return 0f;
+            if (!IsOperational || BurstTimeRemaining <= 0f) return 0f;
             float elapsed      = Math.Min(deltaTime, BurstTimeRemaining);
             BurstTimeRemaining = Math.Max(0f, BurstTimeRemaining - deltaTime);
             return ctx.Config.ManualBurstEnergyPerSec * elapsed;

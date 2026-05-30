@@ -2,8 +2,6 @@ using System;
 
 namespace PlanetCore
 {
-    // Generates Chunk instances with procedurally placed tile types.
-    // Tile type IDs are resolved via DataRegistry.
     public sealed class ChunkGenerator
     {
         private readonly int          _worldSeed;
@@ -25,12 +23,12 @@ namespace PlanetCore
 
         public Chunk Generate(int chunkX, int chunkY)
         {
-            var cfg          = _registry.Config;
-            int size         = cfg.ChunkSize;
-            var chunk        = new Chunk(chunkX, chunkY, size);
-            var rng          = MakeRng(chunkX, chunkY);
-            var plainDef     = _registry.GetTile(PlainId);
-            var depositDef   = _registry.GetTile(DepositId);
+            var cfg        = _registry.Config;
+            int size       = cfg.ChunkSize;
+            var chunk      = new Chunk(chunkX, chunkY, size);
+            var rng        = MakeRng(chunkX, chunkY);
+            var plainDef   = _registry.GetTile(PlainId);
+            var depositDef = _registry.GetTile(DepositId);
             int depositCount = 0;
 
             for (int lx = 0; lx < size; lx++)
@@ -42,17 +40,16 @@ namespace PlanetCore
                 if (isDeposit) depositCount++;
 
                 chunk.SetTile(lx, ly, new TileData(wx, wy,
-                    isDeposit ? depositDef : plainDef));
+                    isDeposit ? depositDef : plainDef, chunk));
             }
 
-            // Guarantee minimum deposit count if required (e.g. PioneeringLuck card)
             for (int lx = 0; lx < size && depositCount < _minDepositCount; lx++)
             for (int ly = 0; ly < size && depositCount < _minDepositCount; ly++)
             {
                 var tile = chunk.GetTile(lx, ly);
                 if (!tile.HasTag("mineable"))
                 {
-                    chunk.SetTile(lx, ly, new TileData(tile.WorldX, tile.WorldY, depositDef));
+                    chunk.SetTile(lx, ly, new TileData(tile.WorldX, tile.WorldY, depositDef, chunk));
                     depositCount++;
                 }
             }

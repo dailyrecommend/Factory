@@ -10,14 +10,10 @@ namespace PlanetCore
         private readonly DataRegistry     _registry;
         private readonly EconomyState     _economy;
         private readonly ComponentContext _componentCtx;
-        private readonly ChunkExpander _chunkExpander;
-        private readonly WorldRenderer _worldRenderer;
-
+        private readonly ChunkExpander    _chunkExpander;
+        private readonly WorldRenderer    _worldRenderer;
 
         private readonly Dictionary<string, int> _placedCounts = new();
-
-        public int GetPlacedCount(string structureId)
-            => _placedCounts.TryGetValue(structureId, out var count) ? count : 0;
 
         public PlacementService(
             WorldMap world, DataRegistry registry,
@@ -31,6 +27,9 @@ namespace PlanetCore
             _chunkExpander = chunkExpander;
             _worldRenderer = worldRenderer;
         }
+
+        public int GetPlacedCount(string structureId)
+            => _placedCounts.TryGetValue(structureId, out var count) ? count : 0;
 
         public float NextStructureCost(string structureId)
         {
@@ -47,6 +46,15 @@ namespace PlanetCore
                 return PlacementResult.TagRequirementNotMet;
 
             if (!_world.TryGetTile(worldX, worldY, out var tile))
+                return PlacementResult.ChunkNotUnlocked;
+
+            // Block placement on inactive chunks
+            _world.TryGetChunk(
+                FloorDiv(worldX, _registry.Config.ChunkSize),
+                FloorDiv(worldY, _registry.Config.ChunkSize),
+                out var chunk);
+
+            if (chunk != null && !chunk.IsActive)
                 return PlacementResult.ChunkNotUnlocked;
 
             if (!tile.IsEmpty)
@@ -68,18 +76,26 @@ namespace PlanetCore
                 throw new Exception($"[PlacementService] No IStructureComponent on: {def.PrefabPath}");
             }
 
+            // Parent to chunk view so building deactivates with chunk
+            var chunkView = _worldRenderer.GetChunkView(
+                FloorDiv(worldX, _registry.Config.ChunkSize),
+                FloorDiv(worldY, _registry.Config.ChunkSize));
+
+            if (chunkView != null)
+                go.transform.SetParent(chunkView.transform);
+
             if (structure is BrokerComponent broker)
                 broker.Setup(_chunkExpander, _worldRenderer);
-            
+
             structure.WorldPosition = (worldX, worldY);
             tile.PlacedStructure    = structure;
             structure.OnPlaced(tile, _componentCtx);
-            
+
             var animator = go.GetComponent<StructureAnimator>();
             animator?.PlayPlaceAnimation();
-            
+
             _economy.SpendCredits(NextStructureCost(structureId));
-            
+
             if (!_placedCounts.ContainsKey(structureId))
                 _placedCounts[structureId] = 0;
             _placedCounts[structureId]++;
@@ -93,22 +109,51 @@ namespace PlanetCore
             if (tile.IsEmpty)                                       return false;
             if (tile.PlacedStructure.StructureId == "basecamp")    return false;
 
+            var id     = tile.PlacedStructure.StructureId;
+            float refund = NextStructureCost(id) * _registry.Config.DemolishRefundRatio;
+
             tile.PlacedStructure.OnRemoved(tile, _componentCtx);
 
             if (tile.PlacedStructure is MonoBehaviour mb)
                 UnityEngine.Object.Destroy(mb.gameObject);
 
-            float refund = NextStructureCost(tile.PlacedStructure.StructureId)
-                           * _registry.Config.DemolishRefundRatio;
-            _economy.AddCredits(refund);
-            
             tile.PlacedStructure = null;
-            
-            var id = tile.PlacedStructure.StructureId;
+
             if (_placedCounts.ContainsKey(id))
                 _placedCounts[id] = Math.Max(0, _placedCounts[id] - 1);
-            
+
+            _economy.AddCredits(refund);
             return true;
+        }
+
+        public void PlaceBasecamp(int worldX, int worldY)
+        {
+            if (!_world.TryGetTile(worldX, worldY, out var tile)) return;
+            if (!tile.IsEmpty) return;
+
+            if (!_registry.TryGetStructure("basecamp", out var def))
+                throw new Exception("[PlacementService] Missing basecamp in structures.csv");
+
+            var position  = TileToWorld(worldX, worldY);
+            var go        = InstantiatePrefab(def.PrefabPath, position);
+            var structure = go.GetComponent<IStructureComponent>();
+
+            if (structure == null)
+            {
+                UnityEngine.Object.Destroy(go);
+                throw new Exception("[PlacementService] Basecamp prefab has no IStructureComponent.");
+            }
+
+            var chunkView = _worldRenderer.GetChunkView(
+                FloorDiv(worldX, _registry.Config.ChunkSize),
+                FloorDiv(worldY, _registry.Config.ChunkSize));
+
+            if (chunkView != null)
+                go.transform.SetParent(chunkView.transform);
+
+            structure.WorldPosition = (worldX, worldY);
+            tile.PlacedStructure    = structure;
+            structure.OnPlaced(tile, _componentCtx);
         }
 
         private Vector3 TileToWorld(int worldX, int worldY)
@@ -127,6 +172,9 @@ namespace PlanetCore
             Debug.LogError($"[PlacementService] Prefab not found: {prefabPath}");
             throw new Exception($"[PlacementService] Missing prefab: {prefabPath}");
         }
+
+        private static int FloorDiv(int a, int b)
+            => a / b - (a % b != 0 && (a ^ b) < 0 ? 1 : 0);
 
         public void ResetCount() => _placedCounts.Clear();
     }

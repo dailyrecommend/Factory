@@ -1,9 +1,10 @@
 using System;
+using UnityEngine;
 
 namespace PlanetCore
 {
-    // Tracks total energy capacity and stored energy across all placed EnergyStorage structures.
-    // Capacity starts at 0. StorageComponent adds/removes capacity on placed/removed.
+    // Stores energy produced by generators.
+    // Automatically sells all stored energy every SellInterval seconds.
     public sealed class EnergyPool
     {
         public float TotalCapacity { get; private set; } = 0f;
@@ -15,8 +16,48 @@ namespace PlanetCore
 
         public event Action<float> OnStoredChanged;
         public event Action<float> OnCapacityChanged;
+        public event Action<float> OnEnergySold;      // fired when energy converts to credits
 
-        // Called by StorageComponent.OnPlaced
+        private readonly EconomyState _economy;
+        private readonly IGameConfig  _config;
+        private GlobalStats _globalStats;
+        private float                 _sellTimer;
+
+        public EnergyPool(EconomyState economy, IGameConfig config, GlobalStats globalStats)
+        {
+            _economy      = economy;
+            _config       = config;
+            _globalStats  = globalStats;
+            _sellTimer    = config.SellInterval;
+        }
+
+        // Called by SimulationEngine every tick
+        public void Tick(float deltaTime)
+        {
+            if (StoredEnergy <= 0f) return;
+
+            _sellTimer -= deltaTime;
+            if (_sellTimer > 0f) return;
+
+            _sellTimer = _config.SellInterval;
+            SellAll();
+        }
+
+        private void SellAll()
+        {
+            if (StoredEnergy <= 0f) return;
+
+            // Apply global EPC multiplier
+            float credits = StoredEnergy * _config.EnergyToCredits * _globalStats.EPCMultiplier;
+            float sold    = StoredEnergy;
+
+            StoredEnergy = 0f;
+            OnStoredChanged?.Invoke(StoredEnergy);
+
+            _economy.AddCredits(credits);
+            OnEnergySold?.Invoke(sold);
+        }
+
         public void AddCapacity(float amount)
         {
             if (amount <= 0f) return;
@@ -24,13 +65,11 @@ namespace PlanetCore
             OnCapacityChanged?.Invoke(TotalCapacity);
         }
 
-        // Called by StorageComponent.OnRemoved
         public void RemoveCapacity(float amount)
         {
             if (amount <= 0f) return;
             TotalCapacity = Math.Max(0f, TotalCapacity - amount);
 
-            // Clamp stored energy to new capacity
             if (StoredEnergy > TotalCapacity)
             {
                 StoredEnergy = TotalCapacity;
@@ -40,38 +79,36 @@ namespace PlanetCore
             OnCapacityChanged?.Invoke(TotalCapacity);
         }
 
-        // Called by SimulationEngine each tick with total energy produced
         public void Add(float amount)
         {
             if (amount <= 0f)        return;
-            if (TotalCapacity <= 0f) return; // No storage available
+            if (TotalCapacity <= 0f) return;
 
             float room    = TotalCapacity - StoredEnergy;
             float toStore = Math.Min(amount, room);
-
             if (toStore <= 0f) return;
 
             StoredEnergy += toStore;
             OnStoredChanged?.Invoke(StoredEnergy);
         }
 
-        // Called by TurnManager at settlement. Returns actual amount drained.
-        public float Drain(float amount)
-        {
-            if (amount <= 0f) return 0f;
-
-            float drained = Math.Min(amount, StoredEnergy);
-            StoredEnergy -= drained;
-            OnStoredChanged?.Invoke(StoredEnergy);
-            return drained;
-        }
-
         public void HardReset()
         {
             TotalCapacity = 0f;
             StoredEnergy  = 0f;
+            _sellTimer    = _config.SellInterval;
             OnStoredChanged?.Invoke(StoredEnergy);
             OnCapacityChanged?.Invoke(TotalCapacity);
+        }
+        
+        public float SellTimerRatio
+        {
+            get
+            {
+                if (_config.SellInterval <= 0f) return 0f;
+                float elapsed = _config.SellInterval - _sellTimer;
+                return Mathf.Clamp01(elapsed / _config.SellInterval);
+            }
         }
     }
 }

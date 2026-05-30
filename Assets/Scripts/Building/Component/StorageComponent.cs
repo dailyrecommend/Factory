@@ -2,13 +2,11 @@ using UnityEngine;
 
 namespace PlanetCore
 {
-    // Adds energy storage capacity to the EnergyPool when placed.
-    // Attach to any structure prefab that should store energy.
     public sealed class StorageComponent : MonoBehaviour, IStructureComponent
     {
-        [SerializeField] private string _structureId  = "energy_storage";
-        [SerializeField] private string _displayName  = "Energy Storage";
-        [SerializeField] private float  _capacity     = 100f;
+        [SerializeField] private string _structureId = "energy_storage";
+        [SerializeField] private string _displayName = "Energy Storage";
+        [SerializeField] private float  _capacity    = 100f;
 
         public string StructureId   => _structureId;
         public string DisplayName   => _displayName;
@@ -18,18 +16,40 @@ namespace PlanetCore
 
         public (int WorldX, int WorldY) WorldPosition { get; set; }
 
+        private EnergyPool _energyPool;
+
         public void OnPlaced(TileData tile, ComponentContext ctx)
         {
-            ctx.EnergyPool.AddCapacity(_capacity);
+            _energyPool = ctx.EnergyPool;
+            _energyPool.AddCapacity(_capacity);
             IsOperational = true;
         }
 
         public void OnRemoved(TileData tile, ComponentContext ctx)
         {
-            ctx.EnergyPool.RemoveCapacity(_capacity);
+            _energyPool?.RemoveCapacity(_capacity);
             IsOperational = false;
         }
 
+        public void OnChunkActivated()
+        {
+            _energyPool?.AddCapacity(_capacity);
+            IsOperational = true;
+        }
+
+        public void OnChunkDeactivated()
+        {
+            _energyPool?.RemoveCapacity(_capacity);
+            IsOperational = false;
+        }
+
+        public void AddCapacity(float amount)
+        {
+            _capacity += amount;
+            if (IsOperational)
+                _energyPool?.AddCapacity(amount);
+        }
+        
         public float Tick(float deltaTime, ComponentContext ctx) => 0f;
 
         public void ReceiveSynergyBonus(float bonusRatio) { }

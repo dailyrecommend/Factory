@@ -5,10 +5,58 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2013afaa-40cb-48da-984e-64340a550612" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Structures/EnergyStorage.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Structures/EnergyStorage.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Structures/EnergyStorage.prefab.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Structures/EnergyStorage.prefab.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Data/upgrades.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Resources/Data/upgrades.csv.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/GlobalStats.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/GlobalStats.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeDefinition.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeDefinition.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeIcon.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeIcon.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradePanel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradePanel.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeSystem.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeSystem.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeTooltip.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeTooltip.cs.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Factory/.idea/csv-editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Factory/.idea/csv-editor.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Factory/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Factory/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Models/Structures/Battery.controller" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Models/Structures/Battery.controller" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Models/Structures/Drill.controller" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Models/Structures/Drill.controller" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Models/Structures/Generator.controller" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Models/Structures/Generator.controller" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Data/constants.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Data/constants.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Structures/Broker.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Structures/Broker.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/TestScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/TestScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/View/CameraController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/View/CameraController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/Component/BrokerComponent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/Component/BrokerComponent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/Component/EnergyProducerComponent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/Component/EnergyProducerComponent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/Component/ManualBurstComponent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/Component/ManualBurstComponent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/Component/StorageComponent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/Component/StorageComponent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/Component/SynergyEmitterComponent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/Component/SynergyEmitterComponent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/Component/TileTagRequireComponent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/Component/TileTagRequireComponent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/IStructureComponent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/IStructureComponent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/PlacementService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/PlacementService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Core/GameConfig.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Core/GameConfig.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Core/IGameConfig.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Core/IGameConfig.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Economy/EnergyPool.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Economy/EnergyPool.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Turn.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Turn/QuotaCalculator.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Turn/QuotaCalculator.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Turn/SettlementResult.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Turn/SettlementResult.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Turn/TurnManager.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Turn/TurnManager.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/View/ChunkView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/View/ChunkView.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/View/GameManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/View/GameManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/View/HUDView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/View/HUDView.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/View/SimulationEngine.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/View/SimulationEngine.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/View/StructureAnimator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/View/StructureAnimator.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/View/WorldRenderer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/View/WorldRenderer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/World/Chunk.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/World/Chunk.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/World/ChunkExpander.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/World/ChunkExpander.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/World/ChunkGenerator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/World/ChunkGenerator.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/World/TileData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/World/TileData.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/World/WorldMap.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/World/WorldMap.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -132,7 +180,11 @@
       <workItem from="1779630418362" duration="2087000" />
       <workItem from="1779638988850" duration="3157000" />
       <workItem from="1779686611069" duration="1974000" />
-      <workItem from="1779771623499" duration="447000" />
+      <workItem from="1779771623499" duration="7223000" />
+      <workItem from="1779832765520" duration="2187000" />
+      <workItem from="1779838391537" duration="2344000" />
+      <workItem from="1780140647584" duration="3943000" />
+      <workItem from="1780169748393" duration="2112000" />
     </task>
     <servers />
   </component>

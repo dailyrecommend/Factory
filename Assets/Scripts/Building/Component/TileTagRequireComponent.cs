@@ -4,9 +4,11 @@ namespace PlanetCore
 {
     public sealed class TileTagRequirementComponent : MonoBehaviour, IStructureComponent
     {
-        [SerializeField] private string _structureId  = "";
-        [SerializeField] private string _displayName  = "";
-        [SerializeField] private string _requiredTag  = "";
+        [SerializeField] private string _structureId = "";
+        [SerializeField] private string _displayName = "";
+        [SerializeField] private string _requiredTag = "";
+
+        private TileData _lastPlacedTile;
 
         public string StructureId   => _structureId;
         public string DisplayName   => _displayName;
@@ -17,10 +19,22 @@ namespace PlanetCore
         public (int WorldX, int WorldY) WorldPosition { get; set; }
 
         public void OnPlaced(TileData tile, ComponentContext ctx)
-            => IsOperational = string.IsNullOrEmpty(_requiredTag) || tile.HasTag(_requiredTag);
+        {
+            _lastPlacedTile = tile;
+            IsOperational   = string.IsNullOrEmpty(_requiredTag) || tile.HasTag(_requiredTag);
+        }
 
         public void OnRemoved(TileData tile, ComponentContext ctx)
-            => IsOperational = false;
+        {
+            _lastPlacedTile = null;
+            IsOperational   = false;
+        }
+
+        public void OnChunkActivated()
+            => IsOperational = _lastPlacedTile != null
+                               && (string.IsNullOrEmpty(_requiredTag) || _lastPlacedTile.HasTag(_requiredTag));
+
+        public void OnChunkDeactivated() => IsOperational = false;
 
         public float Tick(float deltaTime, ComponentContext ctx) => 0f;
 

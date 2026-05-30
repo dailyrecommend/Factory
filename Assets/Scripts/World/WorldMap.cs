@@ -53,12 +53,17 @@ namespace PlanetCore
             var seen   = new HashSet<(int, int)>();
             var deltas = new[] { (0, 1), (0, -1), (1, 0), (-1, 0) };
 
-            foreach (var key in _chunks.Keys)
-            foreach (var (dx, dy) in deltas)
+            foreach (var kvp in _chunks)
             {
-                var candidate = (key.Item1 + dx, key.Item2 + dy);
-                if (!_chunks.ContainsKey(candidate) && seen.Add(candidate))
-                    yield return candidate;
+                // Only active chunks can expand
+                if (!kvp.Value.IsActive) continue;
+
+                foreach (var (dx, dy) in deltas)
+                {
+                    var candidate = (kvp.Key.Item1 + dx, kvp.Key.Item2 + dy);
+                    if (!_chunks.ContainsKey(candidate) && seen.Add(candidate))
+                        yield return candidate;
+                }
             }
         }
 
@@ -78,9 +83,14 @@ namespace PlanetCore
         public IEnumerable<TileData> AllOccupiedTiles()
         {
             foreach (var chunk in _chunks.Values)
-            foreach (var tile  in chunk.AllTiles())
-                if (!tile.IsEmpty)
-                    yield return tile;
+            {
+                // Skip inactive chunks — their structures should not tick
+                if (!chunk.IsActive) continue;
+
+                foreach (var tile in chunk.AllTiles())
+                    if (!tile.IsEmpty)
+                        yield return tile;
+            }
         }
 
         // ── IWorldReader ───────────────────────────────────────────────────

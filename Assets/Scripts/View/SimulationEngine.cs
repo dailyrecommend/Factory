@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace PlanetCore
 {
@@ -9,29 +8,31 @@ namespace PlanetCore
         private EnergyPool       _energyPool;
         private SynergyResolver  _synergyResolver;
         private ComponentContext _componentCtx;
-        private TurnManager      _turnManager;
+        private GlobalStats _globalStats;
 
-        private bool  _isPaused     = false;
-        private float _speedMultiplier = 1f;
+        private float _energyAccumulator = 0f;
+        private float _timeAccumulator   = 0f;
+        private float _currentEPS        = 0f;
+        private const float EPS_UPDATE_INTERVAL = 1f;
 
+        public float CurrentEPS => _currentEPS;
+        
         public void Init(
             WorldMap world,
             EnergyPool energyPool,
             SynergyResolver synergyResolver,
             ComponentContext componentCtx,
-            TurnManager turnManager)
+            GlobalStats globalStats)
         {
             _world           = world;
             _energyPool      = energyPool;
             _synergyResolver = synergyResolver;
             _componentCtx    = componentCtx;
-            _turnManager     = turnManager;
+            _globalStats     = globalStats;
         }
 
         private void Update()
         {
-            if (_turnManager.IsGameOver) return;
-
             _synergyResolver.ResolveSynergies();
 
             float totalEnergy = 0f;
@@ -39,37 +40,26 @@ namespace PlanetCore
             {
                 var structure = tile.PlacedStructure;
                 if (structure == null || !structure.IsOperational) continue;
-                totalEnergy += structure.Tick(Time.deltaTime, _componentCtx);
+
+                // Apply global EPS multiplier
+                totalEnergy += structure.Tick(Time.deltaTime, _componentCtx)
+                               * _globalStats.EPSMultiplier;
             }
 
             if (totalEnergy > 0f)
                 _energyPool.Add(totalEnergy);
 
-            if (_turnManager.Tick(Time.deltaTime))
-                ExecuteSettlement();
-        }
-        
-        private void SetAnimatorsPaused(bool paused)
-        {
-            foreach (var animator in FindObjectsByType<Animator>(FindObjectsSortMode.None))
-                animator.speed = paused ? 0f : _speedMultiplier;
-        }
+            _energyPool.Tick(Time.deltaTime);
 
-        private void ExecuteSettlement()
-        {
-            var result = _turnManager.ExecuteSettlement();
-
-            if (result.QuotaMet)
-                Debug.Log($"[Settlement] Day {result.DayNumber} — PASSED" +
-                          $" | Delivered: {result.EnergyDelivered:F1}" +
-                          $" | Quota: {result.Quota:F1}" +
-                          $" | Credits: {result.CreditsEarned:F1}");
-            else
-                Debug.Log($"[Settlement] Day {result.DayNumber} — FAILED" +
-                          $" | Shortfall: {result.EnergyShortfall:F1}");
-
-            if (!result.QuotaMet) return;
-            _turnManager.AdvanceToNextDay();
+            // EPS tracking
+            _energyAccumulator += totalEnergy;
+            _timeAccumulator   += Time.deltaTime;
+            if (_timeAccumulator >= EPS_UPDATE_INTERVAL)
+            {
+                _currentEPS        = _energyAccumulator / _timeAccumulator;
+                _energyAccumulator = 0f;
+                _timeAccumulator   = 0f;
+            }
         }
     }
 }
