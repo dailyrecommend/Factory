@@ -5,21 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2013afaa-40cb-48da-984e-64340a550612" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/Resources/Data/upgrades.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Resources/Data/upgrades.csv.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/GlobalStats.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/GlobalStats.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeDefinition.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeDefinition.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeIcon.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeIcon.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradePanel.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradePanel.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeSystem.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeSystem.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeTooltip.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/UpgradeTooltip.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Factory/.idea/csv-editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Factory/.idea/csv-editor.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Factory/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Factory/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Models/Structures/Battery.controller" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Models/Structures/Battery.controller" afterDir="false" />
@@ -184,7 +169,7 @@
       <workItem from="1779832765520" duration="2187000" />
       <workItem from="1779838391537" duration="2344000" />
       <workItem from="1780140647584" duration="3943000" />
-      <workItem from="1780169748393" duration="2112000" />
+      <workItem from="1780169748393" duration="2538000" />
     </task>
     <servers />
   </component>
